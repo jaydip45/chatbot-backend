@@ -9,7 +9,7 @@ const io = new Server(server, {
   },
 });
 
-require('./sockets/chat.socket')(io);
+// require('./sockets/chat.socket')(io);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
