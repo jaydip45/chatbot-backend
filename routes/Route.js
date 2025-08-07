@@ -29,12 +29,4 @@ route.get('/users', getUsers);
 route.post('/conversation/add', newConversation);
 route.post('/conversation/get', getConversation);
 
-route.post('/message/add', newMessage);
-route.get('/message/get/:id', getMessages);
-route.post('/login', adminLogin);
-route.get('/admin/conversations', adminAuth, getAllConversations);
-route.get('/admin/messages/:id', adminAuth, getMessagesByConversation);
-route.post('/admin/messages/send', adminAuth, sendMessageAsAdmin);
-route.get('/admin/user/:sessionId', adminAuth, getUserDetails);
-
 module.exports = route;
