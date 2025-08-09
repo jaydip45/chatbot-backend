@@ -1,20 +1,44 @@
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
+const User = require('../models/User');
 
 const newMessage = async (req, res) => {
   try {
-    const newMessage = new Message(req.body);
+    const { senderId, text, type = 'text' } = req.body;
 
-    await newMessage.save();
+    const admin = await User.findOne({ isAdmin: true });
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
 
-    await Conversation.findByIdAndUpdate(
-      req.body.conversationId,
-      { message: req.body.text }
-    );
+    const receiverId = senderId.toString() === admin._id.toString()
+      ? req.body.receiverId 
+      : admin._id;         
+    const conversation = await Conversation.findOne({
+      members: { $all: [senderId, receiverId] }
+    });
 
-    return res.status(200).json('Message has been sent successfully');
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    const message = new Message({
+      conversationId: conversation._id,
+      senderId,
+      receiverId,
+      text,
+      type
+    });
+
+    const savedMessage = await message.save();
+
+    conversation.lastMessage = text;
+    await conversation.save();
+
+    return res.status(200).json(savedMessage);
+
   } catch (error) {
-    return res.status(500).json(error.message);
+    return res.status(500).json({ error: error.message });
   }
 };
 

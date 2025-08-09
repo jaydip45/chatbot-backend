@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 const addUser = async (req, res) => {
   try {
-    const exist = await User.findOne({ sub: req.body.sub });
+    const exist = await User.findOne({ sessionId: req.body.sessionId });
 
     if (exist) {
       return res.status(200).json({ msg: "user already exists" });
