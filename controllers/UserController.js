@@ -5,7 +5,7 @@ const addUser = async (req, res) => {
     const exist = await User.findOne({ sessionId: req.body.sessionId });
 
     if (exist) {
-      return res.status(200).json({ msg: "user already exists" });
+      return res.status(200).json(exist);
     }
 
     const newUser = new User(req.body);
