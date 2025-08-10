@@ -36,6 +36,6 @@ route.post('/login', adminLogin);
 route.get('/admin/conversations', adminAuth, getAllConversations);
 route.get('/admin/messages/:id', adminAuth, getMessagesByConversation);
 route.post('/admin/messages/send', adminAuth, sendMessageAsAdmin);
-route.get('/admin/user/:sessionId', adminAuth, getUserDetails);
+route.get('/admin/user/:id', adminAuth, getUserDetails);
 
 module.exports = route;

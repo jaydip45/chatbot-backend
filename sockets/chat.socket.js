@@ -1,34 +1,37 @@
-const Message = require('../models/Message');
-const Conversation = require('../models/Conversation');
+const Message = require("../models/Message");
+const Conversation = require("../models/Conversation");
 
 module.exports = function setupSocket(io) {
-  io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
-
-    socket.on('joinConversation', (conversationId) => {
+  io.on("connection", (socket) => {
+    socket.on("joinConversation", (conversationId) => {
+      if (!conversationId) return;
       socket.join(conversationId);
-      console.log(`Socket ${socket.id} joined conversation ${conversationId}`);
     });
 
-    socket.on('sendMessage', async (data) => {
-      // data: { conversationId, senderId, receiverId, text, type? }
+    socket.on("sendMessage", async (data) => {
+      const { conversationId, senderId, text, type, senderType } = data || {};
+      if (!conversationId || !senderId || !text) return;
+
       try {
-        const message = new Message(data);
+        const message = new Message({
+          conversationId,
+          senderId,
+          text,
+          type: type || "text",
+          senderType,
+          createdAt: new Date(),
+        });
         const savedMessage = await message.save();
 
-        await Conversation.findByIdAndUpdate(data.conversationId, {
-          lastMessage: data.text,
+        await Conversation.findByIdAndUpdate(conversationId, {
+          lastMessage: text,
           updatedAt: new Date(),
         });
 
-        io.to(data.conversationId).emit('receiveMessage', savedMessage);
+        io.to(conversationId).emit("receiveMessage", savedMessage);
       } catch (err) {
-        console.error('Error handling sendMessage:', err);
+        console.error("Error saving message:", err);
       }
-    });
-
-    socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
     });
   });
 };

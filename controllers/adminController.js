@@ -39,9 +39,14 @@ const sendMessageAsAdmin = async (req, res) => {
   try {
     const { conversationId, receiverId, text, type } = req.body;
 
+    const admin = await User.findOne({ isAdmin: true });
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin user not found' });
+    }
+
     const newMessage = new Message({
       conversationId,
-      senderId: "admin",
+      senderId: admin._id,
       receiverId,
       text,
       type,
@@ -57,7 +62,7 @@ const sendMessageAsAdmin = async (req, res) => {
 
 const getUserDetails = async (req, res) => {
   try {
-    const user = await User.findOne({ sessionId: req.params.sessionId });
+    const user = await User.findOne({ _id: req.params.id });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     res.status(200).json(user);
